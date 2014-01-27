@@ -12,7 +12,7 @@ class host extends AmysqlController
 {
 	public $indexs = null;
 	public $hosts = null;
-	public $action_name = array('start' => '启动' , 'stop' => '停止' , 'reload' => '重启');
+	public $action_name = array('start' => 'Start' , 'stop' => 'Stop' , 'reload' => 'Reload');
 	public $notice = null;
 	public $top_notice = null;
 
@@ -31,15 +31,15 @@ class host extends AmysqlController
 		$this -> vhost();
 	}
 
-	// 虚拟主机
+	// Virtual Hosts
 	function vhost()
 	{
-		$this -> title = '虚拟主机 - AMH';
+		$this -> title = 'Virtual Hosts - AMH';
 		$this -> AmysqlModelBase();
 		Functions::CheckLogin();
 
 		$this -> status = 'error';
-		$error_page_list = array(array('400', 1, '错误请求提示页面'), array('401', 0, '访问的资源未经授权'), array('403', 1, '禁止访问的资源'), array('404', 1, '访问的资源已不存在'), array('405', 0, '访问的资源未经允许'), array('502', 1, '无法响应请求'), array('503', 0, '服务器不可用'), array('504', 0, '请求已超时'));
+		$error_page_list = array(array('400', 1, 'Error Require Page'), array('401', 0, 'No Permission to explore.'), array('403', 1, 'No Permissions To load'), array('404', 1, 'The Page Not Found'), array('405', 0, 'No Permission'), array('502', 1, 'Unable to respond to the request'), array('503', 0, 'The server is not available'), array('504', 0, 'The request timeout'));
 		if (isset($_POST['save']) || isset($_POST['save_edit']))
 		{
 			$host_error_page = array();
@@ -59,7 +59,7 @@ class host extends AmysqlController
 			$domain = str_replace(' ', '', $_GET['run']);
 			$cmd = "amh $m $g $domain";
 			
-			// AMH面板php重启
+			// AMH面板phpReload
 			if ($m == 'php' && $g == 'reload' && $domain == 'amh-web' && isset($_GET['confirm']))
 				$cmd .= ' y';	
 
@@ -71,17 +71,17 @@ class host extends AmysqlController
 				if (!$status)
 				{
 					$this -> status = 'success';
-					$this -> top_notice = "$domain " . $m . $this -> action_name[$g] . '成功。';
+					$this -> top_notice = "$domain " . $m . $this -> action_name[$g] . 'Success';
 				}
 				else
 				{
 					$this -> status = 'error';
-					$this -> top_notice = "$domain " .$m . $this -> action_name[$g] . '失败。';
+					$this -> top_notice = "$domain " .$m . $this -> action_name[$g] . 'Failed.';
 				}
 			}
 		}
 
-		// 删除host
+		// Deletehost
 		if (isset($_GET['del']))
 		{
 			$del_name = $_GET['del'];
@@ -91,10 +91,10 @@ class host extends AmysqlController
 				if ($result[0])
 				{
 					$this -> status = 'success';
-					$this -> top_notice = $del_name . ' : 删除虚拟主机成功。';
+					$this -> top_notice = $del_name . ' : Delete Virtual Host Successful.';
 				}
 				else
-					$this -> top_notice = $del_name . ' : 删除虚拟主机失败。' . implode(',', $result[1]);
+					$this -> top_notice = $del_name . ' : Delete Virtual Host Failed.' . implode(',', $result[1]);
 			}
 		}
 
@@ -102,7 +102,7 @@ class host extends AmysqlController
 		if (isset($_POST['save']))
 		{
 			if (empty($_POST['host_domain']))
-				$this -> notice = '请填写主标识域名。';
+				$this -> notice = 'Please fill in the primary identifier name.';
 			else
 			{
 				$result = $this -> hosts -> host_insert_ssh($_POST);
@@ -110,11 +110,11 @@ class host extends AmysqlController
 				{
 					$this -> hosts -> host_insert($_POST);
 					$this -> status = 'success';
-					$this -> notice = $_POST['host_domain'] . ' : 新增虚拟主机成功。';
+					$this -> notice = $_POST['host_domain'] . ' : Add Virtual Host Successful.';
 					$_POST = array();
 				}
 				else
-					$this -> notice = $_POST['host_domain'] . ' : 新增虚拟主机失败。' . implode(',', $result[1]);
+					$this -> notice = $_POST['host_domain'] . ' : Add Virtual Hosts Failed.' . implode(',', $result[1]);
 			}
 		}
 
@@ -140,12 +140,12 @@ class host extends AmysqlController
 			if ($result[0])
 			{
 				$status = true;
-				$top_notice = $host_name . ' : 编辑虚拟主机配置成功。';
+				$top_notice = $host_name . ' : Edit Virtual Hosts Config Successful.';
 			}
 			else
 			{
 				$this -> status = 'error';
-				$top_notice = $host_name . ' : 编辑虚拟主机配置失败。' . implode(',', $result[1]);
+				$top_notice = $host_name . ' : Edit Virtual Hosts Config Failed.' . implode(',', $result[1]);
 			}
 			
 			if(isset($status)) 
@@ -171,23 +171,23 @@ class host extends AmysqlController
 	// php参数配置
 	function php_setparam()
 	{
-		$this -> title = 'PHP参数设置 - 虚拟主机 - AMH';
+		$this -> title = 'PHP Parameter settings - Virtual Hosts - AMH';
 		$this -> AmysqlModelBase();
 		Functions::CheckLogin();
 
 		$param_list = array(
-			array('设置PHP时区','date.timezone', 'Asia/Hong_Kong'),
-			array('是否显示PHP错误信息','display_errors', 'On / Off'),
-			array('PHP运行内存限制','memory_limit', '68M'),
-			array('POST数据最大限制','post_max_size', '4M'),
-			array('上传文件最大限制','upload_max_filesize', '2M'),
-			array('上传文件个数限制','max_file_uploads', '10'),
-			array('脚本超时时间','max_execution_time', '20'),
-			array('socket超时时间','default_socket_timeout', '60'),
-			array('SESSION过期时间','session.cache_expire', '180'),
-			array('是否开启短标签','short_open_tag', 'On / Off'),
-			array('是否开启自动字符串转义','magic_quotes_gpc', 'On / Off'),
-			array('是否外部字符串自动转义','magic_quotes_runtime', 'On / Off')
+			array('Set PHP Timezone','date.timezone', 'Asia/Hong_Kong'),
+			array('Display Errors','display_errors', 'On / Off'),
+			array('PHP Memory Limit','memory_limit', '68M'),
+			array('POST Max Size','post_max_size', '4M'),
+			array('Upload Max FileSize','upload_max_filesize', '2M'),
+			array('Max file uploads','max_file_uploads', '10'),
+			array('Max execution','max_execution_time', '20'),
+			array('socket Timeout','default_socket_timeout', '60'),
+			array('SESSION Cache Expire','session.cache_expire', '180'),
+			array('Open Short Tag','short_open_tag', 'On / Off'),
+			array('Open magic_Quotes_gpc','magic_quotes_gpc', 'On / Off'),
+			array('Open Magic_Quotes_Runtime','magic_quotes_runtime', 'On / Off')
 		);
 
 		if (isset($_POST['submit']))
@@ -196,19 +196,19 @@ class host extends AmysqlController
 			{
 				$post_keyname = str_replace('.', '_', $val[1]);
 				$cmd = "amh SetParam php $val[1] {$_POST[$post_keyname]}";
-				$cmd = Functions::trim_cmd($cmd . ' noreload');		// 只更改参数不重启
+				$cmd = Functions::trim_cmd($cmd . ' noreload');		// 只更改参数不Reload
 				exec($cmd, $tmp, $status);
 			}
 
 			if (!$status)
 			{
 				$this -> status = 'success';
-				$this -> notice = 'PHP配置更改成功。';
+				$this -> notice = 'PHP Setting  Change Successful.';
 			}
 			else
 			{
 				$this -> status = 'error';
-				$this -> notice = 'PHP配置更改失败。';
+				$this -> notice = 'PHP Setting  Change Failed.';
 			}
 		}
 		
